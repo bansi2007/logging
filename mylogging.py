@@ -43,10 +43,24 @@ def getLogger(name=None):
 
     If no name is specified, return the root logger.
     """
-    print("getting custom logger sweet heart")
+    print("Getting Custom Logger.Wait!")
     logging.setLoggerClass(SeparateLogger)
     if name:
         return SeparateLogger.manager.getLogger(name)
     else:
         return logging.root
 
+"""PROPAGATE:
+ - If this attribute evaluates to true, events logged to this logger will be passed to the handlers of 
+   higher level (ancestor) loggers, in addition to any handlers attached to this logger. Messages are
+   passed directly to the ancestor loggers’ handlers - neither the level nor filters of the ancestor
+   loggers in question are considered.
+ - If this evaluates to false, logging messages are not passed to the handlers of ancestor loggers.
+ - The constructor sets this attribute to True.
+Note : 
+If you attach a handler to a logger and one or more of its ancestors, it may emit the same record multiple times.
+In general, you should not need to attach a handler to more than one logger - if you just attach it to the
+appropriate logger which is highest in the logger hierarchy, then it will see all events logged by all
+descendant loggers, provided that their propagate setting is left set to True. A common scenario is to attach 
+handlers only to the root logger, and to let propagation take care of the rest.
+"""
