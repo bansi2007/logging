@@ -1,15 +1,14 @@
 import logging
-import sys
+import sys , time
+from logging.handlers import TimedRotatingFileHandler
+import import_ipynb
 
 class SeparateLogger(logging.Logger):
-
     def __init__(self, name, level=logging.NOTSET):
         logging.Logger.__init__(self, name, level)
-    
     def callHandlers(self, record):
         """
         Pass a record to all relevant handlers.
-
         Loop through all handlers for this logger and its parents in the
         logger hierarchy. If no handler was found, output a one-off error
         message to sys.stderr. Stop searching up the hierarchy whenever a
@@ -35,20 +34,56 @@ class SeparateLogger(logging.Logger):
                 sys.stderr.write("No handlers could be found for logger"
                                  " \"%s\"\n" % self.name)
                 self.manager.emittedNoHandlerWarning = True
-
-
+                
 def getLogger(name=None):
     """
     Return a logger with the specified name, creating it if necessary.
-
     If no name is specified, return the root logger.
     """
-    print("Getting Custom Logger.Wait!")
+    print("Getting custom logger . Wait!")
     logging.setLoggerClass(SeparateLogger)
     if name:
         return SeparateLogger.manager.getLogger(name)
     else:
         return logging.root
+    
+    
+logger = getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
+
+def add_handlers(logger):
+    rcount = 3
+    formatter = logging.Formatter(
+                fmt="%(asctime)s - %(levelname)s [%(name)s] -  %(filename)s:%(lineno)d - %(message)s "
+            )
+    debugLogHandler = TimedRotatingFileHandler('logs/debug.log', when='S', interval=5, backupCount=rcount)
+    debugLogHandler.setLevel(logging.DEBUG)
+    debugLogHandler.setFormatter(formatter)
+    logger.addHandler(debugLogHandler)
+    infoLogHandler = logging.handlers.TimedRotatingFileHandler('logs/info.log', when='S', interval=5, backupCount=rcount)
+    infoLogHandler.setLevel(logging.INFO)
+    infoLogHandler.setFormatter(formatter)
+    logger.addHandler(infoLogHandler)
+    warningLogHandler = logging.handlers.TimedRotatingFileHandler('logs/warning.log', when='S', interval=5, backupCount=rcount)
+    warningLogHandler.setLevel(logging.WARNING)
+    warningLogHandler.setFormatter(formatter)
+    logger.addHandler(warningLogHandler)
+    errorLogHandler = logging.handlers.TimedRotatingFileHandler('logs/error.log', when='S', interval=5, backupCount=rcount)
+    errorLogHandler.setLevel(logging.ERROR)
+    errorLogHandler.setFormatter(formatter)
+    logger.addHandler(errorLogHandler)
+    
+add_handlers(logger)
+
+if __name__ == "__main__":
+    print("started")
+    while True:
+        logger.warning("warning message")
+        logger.info("info message")
+        logger.error("error message")
+        logger.debug("debug message")
+        time.sleep(10)
 
 """PROPAGATE:
  - If this attribute evaluates to true, events logged to this logger will be passed to the handlers of 
